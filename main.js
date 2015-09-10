@@ -18,52 +18,78 @@ function create() {
 
 function createHuman() {
 
-    var humanHeight = 180;
+    var bodyDef = {
+        name: "pelvis",
+        position: [200, 0],
+        size: [20, 20],
+        mass: 200,
+        subBodies: {
+            spine: {
+                position: [0, 55],
+                size: [20, 90],
+                mass: 400,
+                subBodies: {
+                    neck: {
+                        position: [0, 50],
+                        size: [10, 10],
+                        mass: 100,
+                        subBodies: {
+                            head: {
+                                position: [0, 17.5],
+                                size: [20, 25],
+                                mass: 200
+                            }
+                        }
+                    }
+                }
+            },
+            upLegLeft: {
+                position: [0, -70],
+                size: [15, 50],
+                mass: 200,
+                subBodies: {
+                    lowLegLeft: {
+                        position: [0, -25],
+                        size: [12, 50],
+                        mass: 200,
+                        subBodies: {
+                            footLeft: {
+                                position: [0, -30],
+                                size: [30, 10],
+                                mass: 100
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    };
+    
 
-    var height = 20;        //  Height for the physics body - your image height is 8px
-    var width = 16;         //  This is the width for the physics body. If too small the rectangles will get scrambled together.
+    function createBodyTree(game, body, currentPos) {
 
-    var spine = game.add.sprite(200, 200, 'chain', 0);
-    var pelvis = game.add.sprite(200, 210, 'chain', 0);
+        var newCurrentPos = [currentPos[0] + body.position[0], currentPos[1] - body.position[1]];
 
-    // {
-    //     pelvis
-    //         spine
-    //             neck
-    //                 head
-    //             shoulders
-    //                 upperarms
-    //                     lowerarms
-    //                         hands
-    //         upperlegs
-    //             lowerlegs
-    //                 feet
-    // }
+        console.log("Body tree", body);
+        var part = game.add.sprite(newCurrentPos[0], newCurrentPos[1], null, 0);
+        game.physics.p2.enable(part, true);
 
-    // // Human body defined in centimeters
-    // var humanBody = {
-    //     name: 'spine',
-    //     length: 100,
+        part.body.setRectangle(body.size[0], body.size[1]);
+        part.body.mass = body.mass;
 
 
-    //     subBodies: {
-    //         []
-    //     }
-    // }
+        if(body.subBodies) {
+            _.forOwn(body.subBodies, function(subBody) {
+                // TODO: Add constraints
+                //game.physics.p2.createRevoluteConstraint(body, [body.size[0]/2, body.size[1]/2], subBody, [body.position[0]/2, -body.position[1]/2], 1000);
+                createBodyTree(game, subBody, newCurrentPos);
+            });
+        }
+    }
 
+    createBodyTree(game, bodyDef, [0,300]);
 
-    //  Enable physicsbody
-    _.each([spine, pelvis], function(part) {
-        game.physics.p2.enable(part, false);
-
-        //  Set custom rectangle
-        part.body.setRectangle(width, height);
-
-        part.body.mass = 10;
-    });
-
-
-    game.physics.p2.createRevoluteConstraint(spine, [0, -10], pelvis, [0, 10], 1000);
+    // game.physics.p2.createRevoluteConstraint(spine, [0, -height/2], pelvis, [0, height/2], 1000);
 }
 
 function createRope(length, xAnchor, yAnchor) {
