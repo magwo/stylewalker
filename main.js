@@ -18,7 +18,52 @@ function create() {
 
 function createHuman() {
 
+    var humanHeight = 180;
 
+    var height = 20;        //  Height for the physics body - your image height is 8px
+    var width = 16;         //  This is the width for the physics body. If too small the rectangles will get scrambled together.
+
+    var spine = game.add.sprite(200, 200, 'chain', 0);
+    var pelvis = game.add.sprite(200, 210, 'chain', 0);
+
+    // {
+    //     pelvis
+    //         spine
+    //             neck
+    //                 head
+    //             shoulders
+    //                 upperarms
+    //                     lowerarms
+    //                         hands
+    //         upperlegs
+    //             lowerlegs
+    //                 feet
+    // }
+
+    // // Human body defined in centimeters
+    // var humanBody = {
+    //     name: 'spine',
+    //     length: 100,
+
+
+    //     subBodies: {
+    //         []
+    //     }
+    // }
+
+
+    //  Enable physicsbody
+    _.each([spine, pelvis], function(part) {
+        game.physics.p2.enable(part, false);
+
+        //  Set custom rectangle
+        part.body.setRectangle(width, height);
+
+        part.body.mass = 10;
+    });
+
+
+    game.physics.p2.createRevoluteConstraint(spine, [0, -10], pelvis, [0, 10], 1000);
 }
 
 function createRope(length, xAnchor, yAnchor) {
