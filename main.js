@@ -31,7 +31,7 @@ function createHuman() {
                 subBodies: {
                     neck: {
                         position: [0, 50],
-                        size: [10, 10],
+                        size: [12, 10],
                         mass: 100,
                         subBodies: {
                             head: {
@@ -44,12 +44,12 @@ function createHuman() {
                 }
             },
             upLegLeft: {
-                position: [0, -70],
+                position: [0, -35],
                 size: [15, 50],
                 mass: 200,
                 subBodies: {
                     lowLegLeft: {
-                        position: [0, -25],
+                        position: [0, -45],
                         size: [12, 50],
                         mass: 200,
                         subBodies: {
@@ -66,25 +66,27 @@ function createHuman() {
     };
     
 
-    function createBodyTree(game, body, currentPos) {
+    function createBodyTree(game, bodyDef, currentPos) {
 
-        var newCurrentPos = [currentPos[0] + body.position[0], currentPos[1] - body.position[1]];
+        var newCurrentPos = [currentPos[0] + bodyDef.position[0], currentPos[1] - bodyDef.position[1]];
 
-        console.log("Body tree", body);
+        console.log("Body tree", bodyDef);
         var part = game.add.sprite(newCurrentPos[0], newCurrentPos[1], null, 0);
         game.physics.p2.enable(part, true);
 
-        part.body.setRectangle(body.size[0], body.size[1]);
-        part.body.mass = body.mass;
+        part.body.setRectangle(bodyDef.size[0], bodyDef.size[1]);
+        part.body.mass = bodyDef.mass;
 
 
-        if(body.subBodies) {
-            _.forOwn(body.subBodies, function(subBody) {
+        if(bodyDef.subBodies) {
+            _.forOwn(bodyDef.subBodies, function(subBodyDef) {
                 // TODO: Add constraints
-                //game.physics.p2.createRevoluteConstraint(body, [body.size[0]/2, body.size[1]/2], subBody, [body.position[0]/2, -body.position[1]/2], 1000);
-                createBodyTree(game, subBody, newCurrentPos);
+                var subPart = createBodyTree(game, subBodyDef, newCurrentPos);
+                var attachPos = [newCurrentPos[0] + subBodyDef.position[0], newCurrentPos[1] + subBodyDef.position[1]];
+                game.physics.p2.createRevoluteConstraint(part, [0,0], subPart, [0,0], 10000, attachPos);
             });
         }
+        return part;
     }
 
     createBodyTree(game, bodyDef, [0,300]);
